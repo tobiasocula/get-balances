@@ -32,14 +32,42 @@ app.post("/rebase", async (req, res) => {
     for (const acc of accounts) {
       await contract.mintTo(acc, mintPerAccount);
     }
+    await contract.mintTo(tokenAddress, mintPerAccount)
   }
 
   res.json({'result': true})
 
 });
+
+app.post('/increase-supply', async (req, res) => {
+  const accounts = req.body.accounts;
+  let pct;
+  try {
+    pct = parseInt(req.body.pct);
+  } catch (e) {
+    return res.status(400).json({ error: "no valid pct value" });
+  }
+  
+  const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+  const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
+
+  const supply = await contract.totalSupply();
+  const extraSupply = supply * pct / 100;
+  const mintPerAccount = extraSupply / (accounts.length + 1);
+  for (const acc of accounts) {
+      await contract.mintTo(acc, mintPerAccount);
+    }
+  await contract.mintTo(tokenAddress, mintPerAccount)
+
+  res.json({'result': true})
+
+});
+
+
 app.post('/balances', async (req, res) => {
   try {
-    console.log("Received body:", req.body); // ✅ log incoming body
+    console.log("Received body:", req.body);
 
     const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
 
@@ -50,13 +78,13 @@ app.post('/balances', async (req, res) => {
     let result = [];
     for (const acc of req.body.accounts) {
       const bal = await provider.getBalance(acc);
-      result.push(bal.toString()); // return as string to avoid BigInt issues
+      result.push(bal.toString());
     }
 
     res.json({ balances: result });
 
   } catch (error) {
-    console.error("Error in /balances:", error); // ✅ log error details
+    console.error("Error in /balances:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
