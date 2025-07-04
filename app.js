@@ -12,40 +12,49 @@ const ethers = require("ethers");
 
 const tokenAddress = "0xb8b7Fd8003d0c975694F4c7A348a2946fEE4E33B";
 
+
 app.post("/rebase", async (req, res) => {
+  try {
+    const { accounts, ratio } = req.body;
 
-  // parameters: 
-  // new supply / demand ratio
-  // demo accounts
-  const { accounts, ratio } = req.body;
-  if (!Array.isArray(accounts)) {
-    return res.status(400).json({ error: "Accounts must be an array" });
-  }
-  if (isNaN(ratio)) {
-    return res.status(400).json({ error: "Ratio must be a number" });
-  }
-  const ratioFloat = parseFloat(ratio);
-  
-  const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
-  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-  const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
-
-  const supply = await contract.totalSupply();
-  const newSupply = supply * (ratioFloat - 1);
-  if (newSupply > supply) {
-    const diff = newSupply - supply;
-    const mintPerAccount = diff / (accounts.length + 1);
-    for (const acc of accounts) {
-      await contract.mintTo(acc, mintPerAccount);
+    if (!Array.isArray(accounts)) {
+      return res.status(400).json({ error: "Accounts must be an array" });
     }
-    await contract.mintTo(tokenAddress, mintPerAccount)
-  } else {
-    return res.status(400).json({ error: "Ratio must be a number" });
+
+    if (isNaN(ratio)) {
+      return res.status(400).json({ error: "Ratio must be a number" });
+    }
+
+    const ratioFloat = parseFloat(ratio);
+
+    const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
+    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+    const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
+
+    const supply = await contract.totalSupply(); // BigInt
+    const newSupply = BigInt(Math.floor(Number(supply) * ratioFloat));
+
+    if (newSupply > supply) {
+      const diff = newSupply - supply;
+      const mintPerAccount = diff / BigInt(accounts.length + 1);
+
+      for (const acc of accounts) {
+        await contract.mintTo(acc, mintPerAccount);
+      }
+
+      await contract.mintTo(tokenAddress, mintPerAccount);
+    } else {
+      return res.status(400).json({ error: "Ratio must be greater than 1" });
+    }
+
+    res.json({ result: true });
+
+  } catch (err) {
+    console.error("Error in /rebase:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
-
-  res.json({'result': true})
-
 });
+
 
 
 app.post('/init-airdrop', async (req, res) => {
