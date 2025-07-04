@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require('cors');
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 const port = process.env.PORT || 3001;
 
@@ -16,8 +17,8 @@ app.post("/rebase", async (req, res) => {
   // parameters: 
   // new supply / demand ratio
   // demo accounts
-  const accounts = req.query.accounts;
-  const ratio = req.query.ratio;
+  const accounts = req.body.accounts;
+  const ratio = req.body.ratio;
   
   const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
@@ -41,7 +42,7 @@ app.post('/balances', async (req, res) => {
   // parameter: accountss (array of addresses)
   const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
   let result = [];
-  for (const acc of req.query.accounts) {
+  for (const acc of req.body.accounts) {
     result.push(await provider.getBalance(acc));
   }
   
