@@ -62,9 +62,12 @@ app.post('/init-airdrop', async (req, res) => {
 
 app.post('/increase-supply', async (req, res) => {
   const accounts = req.body.accounts;
-  const pct = req.body.pct;
+  let pct = req.body.pct;
   if (isNaN(pct)) {
     return res.status(400).json({ error: "no valid pct value" });
+  }
+  if (!Array.isArray(accounts)) {
+    return res.status(400).json({ error: "Accounts must be an array" });
   }
   pct = parseInt(req.body.pct);
 
@@ -111,5 +114,10 @@ app.post('/balances', async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+app.postt('/pinging', async (req, res) => {
+  res.json({result: true})
+})
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
