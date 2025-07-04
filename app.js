@@ -18,7 +18,7 @@ app.get("/rebase", async (req, res) => {
 
 });
 
-app.get('/balances', async (account, res) => {
+app.get('/balances', async (req, res) => {
   const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
   const balance = await provider.getBalance(account);
   res.json({'balance': balance});
