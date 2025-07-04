@@ -72,14 +72,15 @@ app.post('/increase-supply', async (req, res) => {
   pct = BigInt(Math.floor(parseFloat(req.body.pct)));
   console.log('value of pct:', pct);
 
-  
+  const supply = await contract.totalSupply(); // BigInt
+  const extraSupply = (supply * pct) / BigInt(10000); // divide by 10000 instead of 100 to support decimal %
+  const mintPerAccount = extraSupply / BigInt(accounts.length + 1);
+
+
   const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
   const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
 
-  const supply = await contract.totalSupply();
-  const extraSupply = supply * pct / 100;
-  const mintPerAccount = extraSupply / (accounts.length + 1);
   for (const acc of accounts) {
       await contract.mintTo(acc, mintPerAccount);
     }
