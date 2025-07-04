@@ -37,16 +37,28 @@ app.post("/rebase", async (req, res) => {
   res.json({'result': true})
 
 });
-
 app.post('/balances', async (req, res) => {
-  // parameter: accountss (array of addresses)
-  const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
-  let result = [];
-  for (const acc of req.body.accounts) {
-    result.push(await provider.getBalance(acc));
+  try {
+    console.log("Received body:", req.body); // ✅ log incoming body
+
+    const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
+
+    if (!Array.isArray(req.body.accounts)) {
+      return res.status(400).json({ error: "'accounts' must be an array" });
+    }
+
+    let result = [];
+    for (const acc of req.body.accounts) {
+      const bal = await provider.getBalance(acc);
+      result.push(bal.toString()); // return as string to avoid BigInt issues
+    }
+
+    res.json({ balances: result });
+
+  } catch (error) {
+    console.error("Error in /balances:", error); // ✅ log error details
+    res.status(500).json({ error: "Internal server error" });
   }
-  
-  res.json({'balances': result});
-})
+});
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`));
