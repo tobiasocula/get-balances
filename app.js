@@ -39,6 +39,18 @@ app.post("/rebase", async (req, res) => {
 
 });
 
+
+app.post('/init-airdrop', async (req, res) => {
+  const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
+  const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+  const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
+  for (const acc of accounts) {
+      await contract.mintTo(acc, 1000 * 10**18);
+    }
+    await contract.mintTo(tokenAddress, 1000 * 10**18)
+  res.json({'result': true})
+});
+
 app.post('/increase-supply', async (req, res) => {
   const accounts = req.body.accounts;
   let pct;
