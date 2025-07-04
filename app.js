@@ -63,14 +63,14 @@ app.post('/init-airdrop', async (req, res) => {
 app.post('/increase-supply', async (req, res) => {
   const accounts = req.body.accounts;
   let pct = req.body.pct;
-  console.log('increase-supply called, pct:', pct);
   if (isNaN(pct)) {
     return res.status(400).json({ error: "no valid pct value" });
   }
   if (!Array.isArray(accounts)) {
     return res.status(400).json({ error: "Accounts must be an array" });
   }
-  pct = parseFloat(req.body.pct);
+  pct = BigInt(Math.floor(parseFloat(req.body.pct)));
+  console.log('value of pct:', pct);
 
   
   const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
