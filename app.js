@@ -10,7 +10,7 @@ const port = process.env.PORT || 3001;
 const artifact = require('./contract.json');
 const ethers = require("ethers");
 
-const tokenAddress = "0xb8b7Fd8003d0c975694F4c7A348a2946fEE4E33B";
+const tokenAddress = "0xd0994625782155Fe371E8749696001E3c57eEdfe";
 
 
 app.post("/rebase", async (req, res) => {
