@@ -46,9 +46,9 @@ app.post('/init-airdrop', async (req, res) => {
   const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
   const accounts = req.body.accounts;
   for (const acc of accounts) {
-      await contract.mintTo(acc, 1000 * 10**18);
+      await contract.mintTo(acc, ethers.parseUnits('1000', 18));
     }
-    await contract.mintTo(tokenAddress, 1000 * 10**18)
+    await contract.mintTo(tokenAddress, ethers.parseUnits('1000', 18));
   res.json({'result': true})
 });
 
