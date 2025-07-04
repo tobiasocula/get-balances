@@ -1,8 +1,9 @@
 require('dotenv').config(); // load from .env automatically
 const express = require("express");
 const cors = require('cors');
-app.use(cors());
 const app = express();
+app.use(cors());
+
 const port = process.env.PORT || 3001;
 
 const artifact = require('./contract.json');
