@@ -44,6 +44,7 @@ app.post('/init-airdrop', async (req, res) => {
   const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
   const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
+  const accounts = req.body.accounts;
   for (const acc of accounts) {
       await contract.mintTo(acc, 1000 * 10**18);
     }
