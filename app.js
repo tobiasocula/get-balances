@@ -116,7 +116,7 @@ app.post('/balances', async (req, res) => {
 });
 
 
-app.postt('/pinging', async (req, res) => {
+app.post('/pinging', async (req, res) => {
   res.json({result: true})
 })
 
