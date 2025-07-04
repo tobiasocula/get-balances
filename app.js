@@ -39,10 +39,12 @@ app.post("/rebase", async (req, res) => {
       const mintPerAccount = diff / BigInt(accounts.length + 1);
 
       for (const acc of accounts) {
-        await contract.mintTo(acc, mintPerAccount);
+        let tx = await contract.mintTo(acc, mintPerAccount);
+        await tx.wait();
       }
 
-      await contract.mintTo(tokenAddress, mintPerAccount);
+      tx = await contract.mintTo(tokenAddress, mintPerAccount);
+      await tx.wait();
     } else {
       return res.status(400).json({ error: "Ratio must be greater than 1" });
     }
@@ -63,9 +65,11 @@ app.post('/init-airdrop', async (req, res) => {
   const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
   const accounts = req.body.accounts;
   for (const acc of accounts) {
-      await contract.mintTo(acc, ethers.parseUnits('1000', 18));
+      let tx = await contract.mintTo(acc, ethers.parseUnits('1000', 18));
+      await tx.wait();
     }
-    await contract.mintTo(tokenAddress, ethers.parseUnits('1000', 18));
+    tx = await contract.mintTo(tokenAddress, ethers.parseUnits('1000', 18));
+    await tx.wait();
   res.json({'result': true})
 });
 
@@ -93,9 +97,11 @@ app.post('/increase-supply', async (req, res) => {
   
 
   for (const acc of accounts) {
-      await contract.mintTo(acc, mintPerAccount);
+      let tx = await contract.mintTo(acc, mintPerAccount);
+      await tx.wait();
     }
-  await contract.mintTo(tokenAddress, mintPerAccount)
+  tw = await contract.mintTo(tokenAddress, mintPerAccount)
+  await tx.wait();
 
   res.json({'result': true})
 
