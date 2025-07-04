@@ -10,22 +10,21 @@ const port = process.env.PORT || 3001;
 const artifact = require('./contract.json');
 const ethers = require("ethers");
 
-const tokenAddress = "0xd0994625782155Fe371E8749696001E3c57eEdfe";
+const tokenAddress = "0x132B48D41d08c2a081e6626509701dDE74817f30";
 
 
 app.post("/rebase", async (req, res) => {
   try {
     const { accounts, ratio } = req.body;
 
-    if (!Array.isArray(accounts)) {
-      return res.status(400).json({ error: "Accounts must be an array" });
-    }
-
     if (isNaN(ratio)) {
       return res.status(400).json({ error: "Ratio must be a number" });
     }
 
     const ratioFloat = parseFloat(ratio);
+    if (ratioFloat < 1) {
+      return res.status(400).json({ error: "Ratio must be greater or equal than 1 (currently no token burning logic is in place" });
+    }
 
     const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
     const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
@@ -34,7 +33,6 @@ app.post("/rebase", async (req, res) => {
     const supply = await contract.totalSupply(); // BigInt
     const newSupply = BigInt(Math.floor(Number(supply) * ratioFloat));
 
-    if (newSupply > supply) {
       const diff = newSupply - supply;
       const mintPerAccount = diff / BigInt(accounts.length + 1);
 
@@ -45,9 +43,6 @@ app.post("/rebase", async (req, res) => {
 
       tx = await contract.mintTo(tokenAddress, mintPerAccount);
       await tx.wait();
-    } else {
-      return res.status(400).json({ error: "Ratio must be greater than 1 (currently no burning of tokens is implemented)" });
-    }
 
     res.json({ result: true });
 
@@ -78,9 +73,6 @@ app.post('/increase-supply', async (req, res) => {
   let pct = req.body.pct;
   if (isNaN(pct)) {
     return res.status(400).json({ error: "no valid pct value" });
-  }
-  if (!Array.isArray(accounts)) {
-    return res.status(400).json({ error: "Accounts must be an array" });
   }
   pct = BigInt(Math.floor(parseFloat(req.body.pct)));
   console.log('value of pct:', pct);
@@ -115,10 +107,6 @@ app.post('/balances', async (req, res) => {
     const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
     const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
     const contract = new ethers.Contract(tokenAddress, artifact.abi, wallet);
-
-    if (!Array.isArray(req.body.accounts)) {
-      return res.status(400).json({ error: "Accounts must be an array" });
-    }
 
     let result = [];
     for (const acc of req.body.accounts) {
