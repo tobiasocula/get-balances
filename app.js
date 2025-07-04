@@ -46,7 +46,7 @@ app.post("/rebase", async (req, res) => {
       tx = await contract.mintTo(tokenAddress, mintPerAccount);
       await tx.wait();
     } else {
-      return res.status(400).json({ error: "Ratio must be greater than 1" });
+      return res.status(400).json({ error: "Ratio must be greater than 1 (currently no burning of tokens is implemented)" });
     }
 
     res.json({ result: true });
@@ -100,7 +100,7 @@ app.post('/increase-supply', async (req, res) => {
       let tx = await contract.mintTo(acc, mintPerAccount);
       await tx.wait();
     }
-  tw = await contract.mintTo(tokenAddress, mintPerAccount)
+  tx = await contract.mintTo(tokenAddress, mintPerAccount)
   await tx.wait();
 
   res.json({'result': true})
