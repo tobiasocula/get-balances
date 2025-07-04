@@ -1,5 +1,7 @@
 require('dotenv').config(); // load from .env automatically
 const express = require("express");
+const cors = require('cors');
+app.use(cors());
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -8,7 +10,7 @@ const ethers = require("ethers");
 
 const tokenAddress = "0xb8b7Fd8003d0c975694F4c7A348a2946fEE4E33B";
 
-app.get("/rebase", async (req, res) => {
+app.post("/rebase", async (req, res) => {
 
   // parameters: 
   // new supply / demand ratio
@@ -29,12 +31,12 @@ app.get("/rebase", async (req, res) => {
       await contract.mintTo(acc, mintPerAccount);
     }
   }
-  
+
   res.json({'result': true})
 
 });
 
-app.get('/balances', async (req, res) => {
+app.post('/balances', async (req, res) => {
   // parameter: accountss (array of addresses)
   const provider = new ethers.JsonRpcProvider(process.env.ALCHEMY_URL);
   let result = [];
